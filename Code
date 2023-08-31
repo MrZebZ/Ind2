@@ -1,0 +1,590 @@
+
+study("Hidden SnR", overlay = true, max_lines_count = 500)
+
+//inputs
+
+showRound = input(true, title="Show Round Levels")
+showSimilar = input(true, title="Apply Similarity Pattern")
+showIncrement = input(true, title="Apply Increment Patterns")
+showDecrement = input(true, title="Apply Decrement Patterns")
+showAdd = input(true, title="Apply Addition Patterns")
+showSubtract = input(true, title="Apply Subtraction Patterns")
+showMultiply = input(true, title="Apply Multiplication Patterns")
+showDivide = input(true, title="Apply Division Patterns")
+showMirror = input(true, title="Apply Mirror Patterns")
+
+//psychological calculations based on some patterns
+
+//aaa
+sim3(n) =>
+    a = floor(n / 100)
+    f = (a * 100) + (a * 10) + a
+
+//aaaaa
+sim5(n) =>
+    a = floor(n / 10000)
+    f = (a * 10000) + (a * 1000) + (a * 100) + (a * 10) + a
+
+//(a)(a+1)(a+2)
+inc31(n) =>
+    a = floor(n / 100)
+    b = a + 1
+    c = b + 1
+    f = (c < 10) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a+2)(a+4)
+inc32(n) =>
+    a = floor(n / 100)
+    b = a + 2
+    c = b + 2
+    f = (c < 10) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a+3)(a+6)
+inc33(n) =>
+    a = floor(n / 100)
+    b = a + 3
+    c = b + 3
+    f = (c < 10) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a*2)(a*4)
+inc34(n) =>
+    a = floor(n / 100)
+    b = a * 2
+    c = b * 2
+    f = (c < 10) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a+1)(a+2)(a+3)(a+4)
+inc51(n) =>
+    a = floor(n / 10000)
+    b = a + 1
+    c = b + 1
+    d = c + 1
+    e = d + 1
+    f = (e < 10) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a+2)(a+4)(a+6)(a+8)
+inc52(n) =>
+    a = floor(n / 10000)
+    b = a + 2
+    c = b + 2
+    d = c + 2
+    e = d + 2
+    f = (e < 10) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a-1)(a-2)
+dec31(n) =>
+    a = floor(n / 100)
+    b = a - 1
+    c = b - 1
+    f = (c > -1) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a-2)(a-4)
+dec32(n) =>
+    a = floor(n / 100)
+    b = a - 2
+    c = b - 2
+    f = (c > -1) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a-3)(a-6)
+dec33(n) =>
+    a = floor(n / 100)
+    b = a - 3
+    c = b - 3
+    f = (c > -1) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a/2)(a/4)
+dec34(n) =>
+    a = floor(n / 100)
+    b = a / 2
+    c = b / 2
+    f = (c % 1 == 0) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a-1)(a-2)(a-3)(a-4)
+dec51(n) =>
+    a = floor(n / 10000)
+    b = a - 1
+    c = b - 1
+    d = c - 1
+    e = d - 1
+    f = (e > -1) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a-2)(a-4)(a-6)(a-8)
+dec52(n) =>
+    a = floor(n / 10000)
+    b = a - 2
+    c = b - 2
+    d = c - 2
+    e = d - 2
+    f = (e > -1) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//a+b=c
+add3(n) =>
+    a = floor(n / 100)
+    b = floor(n / 10) % 10
+    c = a + b
+    f = (c < 10) ? (a * 100) + (b * 10) + c : na
+
+//ab+c=de
+add51(n) =>
+    ab = floor(n / 1000)
+    c = floor(n / 100) % 10
+    de = ab + c
+    f = (de < 100) ? (ab * 1000) + (c * 100) + de : na
+
+//a+bc=de
+add52(n) =>
+    a = floor(n / 10000)
+    bc = floor(n / 100) % 100
+    de = a + bc
+    f = (de < 100) ? (a * 10000) + (bc * 100) + de : na
+
+//a-b=c
+sub3(n) =>
+    a = floor(n / 100)
+    b = floor(n / 10) % 10
+    c = a - b
+    f = (c > -1) ? (a * 100) + (b * 10) + c : na
+
+//ab-c=de
+sub51(n) =>
+    ab = floor(n / 1000)
+    c = floor(n / 100) % 10
+    de = ab - c
+    f = (de > 9) ? (ab * 1000) + (c * 100) + de : na
+
+//ab-cd=e
+sub52(n) =>
+    ab = floor(n / 1000)
+    cd = floor(n / 10) % 100
+    e = ab - cd
+    f = (e > -1) and (e < 10) ? (ab * 1000) + (cd * 10) + e : na
+
+//a*b=c
+mul3(n) =>
+    a = floor(n / 100)
+    b = floor(n / 10) % 10
+    c = a * b
+    f = (c < 10) ? (a * 100) + (b * 10) + c : na
+
+//a*bc=de
+mul51(n) =>
+    a = floor(n / 10000)
+    bc = floor(n / 100) % 100
+    de = a * bc
+    f = (de < 100) ? (a * 10000) + (bc * 100) + de : na
+
+//ab*c=de
+mul52(n) =>
+    ab = floor(n / 1000)
+    c = floor(n / 100) % 10
+    de = ab * c
+    f = (de < 100) ? (ab * 1000) + (c * 100) + de : na
+
+//a/b=c
+div3(n) =>
+    a = floor(n / 100)
+    b = floor(n / 10) % 10
+    c = a / b
+    f = (c % 1 == 0) ? (a * 100) + (b * 10) + c : na
+
+//ab/c=de
+div51(n) =>
+    ab = floor(n / 1000)
+    c = floor(n / 100) % 10
+    de = ab / c
+    f = (de > 9) and (de % 1 == 0) ? (ab * 1000) + (c * 100) + de : na
+
+//ab/cd=e
+div52(n) =>
+    ab = floor(n / 1000)
+    cd = floor(n / 10) % 100
+    e = ab / cd
+    f = (e > -1) and (e % 1 == 0) ? (ab * 1000) + (cd * 10) + e : na
+
+//(a)(a+1)(a)
+mir31(n) =>
+    a = floor(n / 100)
+    b = a + 1
+    c = b - 1
+    f = (b < 10) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a-1)(a)
+mir32(n) =>
+    a = floor(n / 100)
+    b = a - 1
+    c = b + 1
+    f = (b > -1) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a*2)(a)
+mir331(n) =>
+    a = floor(n / 100)
+    b = a * 2
+    c = b / 2
+    f = (b < 10) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a*3)(a)
+mir332(n) =>
+    a = floor(n / 100)
+    b = a * 3
+    c = b / 3
+    f = (b < 10) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a*4)(a)
+mir333(n) =>
+    a = floor(n / 100)
+    b = a * 4
+    c = b / 4
+    f = (b < 10) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a/2)(a)
+mir341(n) =>
+    a = floor(n / 100)
+    b = a / 2
+    c = b * 2
+    f = (c < 10) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a/3)(a)
+mir342(n) =>
+    a = floor(n / 100)
+    b = a / 3
+    c = b * 3
+    f = (c < 10) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a/4)(a)
+mir343(n) =>
+    a = floor(n / 100)
+    b = a / 4
+    c = b * 4
+    f = (c < 10) ? (a * 100) + (b * 10) + c : na
+
+//(a)(a*2)(a*4)(a*2)(a)
+mir511(n) =>
+    a = floor(n / 10000)
+    b = a * 2
+    c = b * 2
+    d = c / 2
+    e = d / 2
+    f = (c < 10) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a*3)(a*9)(a*3)(a)
+mir512(n) =>
+    a = floor(n / 10000)
+    b = a * 3
+    c = b * 3
+    d = c / 3
+    e = d / 3
+    f = (c < 10) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a/2)(a/4)(a/2)(a)
+mir521(n) =>
+    a = floor(n / 10000)
+    b = a / 2
+    c = b / 2
+    d = c * 2
+    e = d * 2
+    f = (e < 10) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a/3)(a/9)(a/3)(a)
+mir522(n) =>
+    a = floor(n / 10000)
+    b = a / 3
+    c = b / 3
+    d = c * 3
+    e = d * 3
+    f = (e < 10) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a+1)(a+2)(a+1)(a)
+mir531(n) =>
+    a = floor(n / 10000)
+    b = a + 1
+    c = b + 1
+    d = c - 1
+    e = d - 1
+    f = (c < 10) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a+2)(a+4)(a+2)(a)
+mir532(n) =>
+    a = floor(n / 10000)
+    b = a + 2
+    c = b + 2
+    d = c - 2
+    e = d - 2
+    f = (c < 10) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a+3)(a+6)(a+3)(a)
+mir533(n) =>
+    a = floor(n / 10000)
+    b = a + 3
+    c = b + 3
+    d = c - 3
+    e = d - 3
+    f = (c < 10) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a+4)(a+8)(a+4)(a)
+mir534(n) =>
+    a = floor(n / 10000)
+    b = a + 4
+    c = b + 4
+    d = c - 4
+    e = d - 4
+    f = (c < 10) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a-1)(a-2)(a-1)(a)
+mir541(n) =>
+    a = floor(n / 10000)
+    b = a - 1
+    c = b - 1
+    d = c + 1
+    e = d + 1
+    f = (c > -1) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a-2)(a-4)(a-2)(a)
+mir542(n) =>
+    a = floor(n / 10000)
+    b = a - 2
+    c = b - 2
+    d = c + 2
+    e = d + 2
+    f = (c > -1) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a-3)(a-6)(a-3)(a)
+mir543(n) =>
+    a = floor(n / 10000)
+    b = a - 3
+    c = b - 3
+    d = c + 3
+    e = d + 3
+    f = (c > -1) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//(a)(a-4)(a-8)(a-4)(a)
+mir544(n) =>
+    a = floor(n / 10000)
+    b = a - 4
+    c = b - 4
+    d = c + 4
+    e = d + 4
+    f = (c > -1) ? (a * 10000) + (b * 1000) + (c * 100) + (d * 10) + e : na
+
+//hidden levels calculation
+
+//round levels
+lowerRound(price) => syminfo.mintick == 0.00001 ? price - ((price * 100000 % 100) / 100000) : price - ((price * 1000 % 100) / 1000)
+higherRound(price) => syminfo.mintick == 0.00001 ? price - ((price * 100000 % 100) / 100000) + 0.001 : price - ((price * 1000 % 100) / 1000) + 0.1
+
+//magic levels
+magic(op, price) =>
+    n = 0
+    r = 0.0
+    if op == "sim3"
+        n := syminfo.mintick == 0.001 ? sim3(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "sim5"
+        n := syminfo.mintick == 0.00001 ? sim5(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "inc31"
+        n := syminfo.mintick == 0.001 ? inc31(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "inc32"
+        n := syminfo.mintick == 0.001 ? inc32(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "inc33"
+        n := syminfo.mintick == 0.001 ? inc33(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "inc34"
+        n := syminfo.mintick == 0.001 ? inc34(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "inc51"
+        n := syminfo.mintick == 0.00001 ? inc51(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "inc52"
+        n := syminfo.mintick == 0.00001 ? inc52(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "dec31"
+        n := syminfo.mintick == 0.001 ? dec31(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "dec32"
+        n := syminfo.mintick == 0.001 ? dec32(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "dec33"
+        n := syminfo.mintick == 0.001 ? dec33(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "dec34"
+        n := syminfo.mintick == 0.001 ? dec34(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "dec51"
+        n := syminfo.mintick == 0.00001 ? dec51(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "dec52"
+        n := syminfo.mintick == 0.00001 ? dec52(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "add3"
+        n := syminfo.mintick == 0.001 ? add3(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "add51"
+        n := syminfo.mintick == 0.00001 ? add51(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "add52"
+        n := syminfo.mintick == 0.00001 ? add52(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "sub3"
+        n := syminfo.mintick == 0.001 ? sub3(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "sub51"
+        n := syminfo.mintick == 0.00001 ? sub51(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "sub52"
+        n := syminfo.mintick == 0.00001 ? sub52(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mul3"
+        n := syminfo.mintick == 0.001 ? mul3(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "mul51"
+        n := syminfo.mintick == 0.00001 ? mul51(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mul52"
+        n := syminfo.mintick == 0.00001 ? mul52(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "div3"
+        n := syminfo.mintick == 0.001 ? div3(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "div51"
+        n := syminfo.mintick == 0.00001 ? div51(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "div52"
+        n := syminfo.mintick == 0.00001 ? div52(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mir31"
+        n := syminfo.mintick == 0.001 ? mir31(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "mir32"
+        n := syminfo.mintick == 0.001 ? mir32(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "mir331"
+        n := syminfo.mintick == 0.001 ? mir331(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "mir332"
+        n := syminfo.mintick == 0.001 ? mir332(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "mir333"
+        n := syminfo.mintick == 0.001 ? mir333(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "mir341"
+        n := syminfo.mintick == 0.001 ? mir341(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "mir342"
+        n := syminfo.mintick == 0.001 ? mir342(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "mir343"
+        n := syminfo.mintick == 0.001 ? mir343(price * 1000 % 1000) : na
+        r := na(n) ? na : floor(price) + (n / 1000)
+    if op == "mir511"
+        n := syminfo.mintick == 0.00001 ? mir511(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mir512"
+        n := syminfo.mintick == 0.00001 ? mir512(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mir521"
+        n := syminfo.mintick == 0.00001 ? mir521(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mir522"
+        n := syminfo.mintick == 0.00001 ? mir522(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mir531"
+        n := syminfo.mintick == 0.00001 ? mir531(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mir532"
+        n := syminfo.mintick == 0.00001 ? mir532(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mir533"
+        n := syminfo.mintick == 0.00001 ? mir533(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mir534"
+        n := syminfo.mintick == 0.00001 ? mir534(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mir541"
+        n := syminfo.mintick == 0.00001 ? mir541(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mir542"
+        n := syminfo.mintick == 0.00001 ? mir542(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mir543"
+        n := syminfo.mintick == 0.00001 ? mir543(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    if op == "mir544"
+        n := syminfo.mintick == 0.00001 ? mir544(price * 100000 % 100000) : na
+        r := na(n) ? na : floor(price) + (n / 100000)
+    r
+
+//plots
+
+drawHLine(y, c) =>
+    if not na(y)
+        line.new(bar_index[1], y, bar_index, y, extend = extend.both, style = line.style_dotted, color = c)
+
+//plot(lowerRound(close), trackprice = 1, offset = -99999)
+//plot(higherRound(close), trackprice = 1, offset = -99999)
+if showRound
+    drawHLine(lowerRound(close), color.navy)
+    drawHLine(higherRound(close), color.navy)
+
+if showSimilar
+    drawHLine(magic("sim3", close), color.blue)
+    drawHLine(magic("sim5", close), color.blue)
+
+if showIncrement
+    drawHLine(magic("inc31", close), color.blue)
+    drawHLine(magic("inc32", close), color.blue)
+    drawHLine(magic("inc33", close), color.blue)
+    drawHLine(magic("inc34", close), color.blue)
+    drawHLine(magic("inc51", close), color.blue)
+    drawHLine(magic("inc52", close), color.blue)
+
+if showDecrement
+    drawHLine(magic("dec31", close), color.blue)
+    drawHLine(magic("dec32", close), color.blue)
+    drawHLine(magic("dec33", close), color.blue)
+    drawHLine(magic("dec34", close), color.blue)
+    drawHLine(magic("dec51", close), color.blue)
+    drawHLine(magic("dec52", close), color.blue)
+
+if showAdd
+    drawHLine(magic("add3", close), color.blue)
+    drawHLine(magic("add51", close), color.blue)
+    drawHLine(magic("add52", close), color.blue)
+
+if showSubtract
+    drawHLine(magic("sub3", close), color.blue)
+    drawHLine(magic("sub51", close), color.blue)
+    drawHLine(magic("sub52", close), color.blue)
+
+if showMultiply
+    drawHLine(magic("mul3", close), color.blue)
+    drawHLine(magic("mul51", close), color.blue)
+    drawHLine(magic("mul52", close), color.blue)
+
+if showDivide
+    drawHLine(magic("div3", close), color.blue)
+    drawHLine(magic("div51", close), color.blue)
+    drawHLine(magic("div52", close), color.blue)
+
+if showMirror
+    drawHLine(magic("mir31", close), color.blue)
+    drawHLine(magic("mir32", close), color.blue)
+    drawHLine(magic("mir331", close), color.blue)
+    drawHLine(magic("mir332", close), color.blue)
+    drawHLine(magic("mir333", close), color.blue)
+    drawHLine(magic("mir341", close), color.blue)
+    drawHLine(magic("mir342", close), color.blue)
+    drawHLine(magic("mir343", close), color.blue)
+    drawHLine(magic("mir511", close), color.blue)
+    drawHLine(magic("mir512", close), color.blue)
+    drawHLine(magic("mir521", close), color.blue)
+    drawHLine(magic("mir522", close), color.blue)
+    drawHLine(magic("mir531", close), color.blue)
+    drawHLine(magic("mir532", close), color.blue)
+    drawHLine(magic("mir533", close), color.blue)
+    drawHLine(magic("mir534", close), color.blue)
+    drawHLine(magic("mir541", close), color.blue)
+    drawHLine(magic("mir542", close), color.blue)
+    drawHLine(magic("mir543", close), color.blue)
+    drawHLine(magic("mir544", close), color.blue)
